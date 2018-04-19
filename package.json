@@ -1,0 +1,33 @@
+{
+  "name": "chromecontroller",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FASTLIKETREE/chromecontroller.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FASTLIKETREE/chromecontroller/issues"
+  },
+  "homepage": "https://github.com/FASTLIKETREE/chromecontroller#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-es2015": "^1.1.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
+    "run-sequence": "^2.2.1"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "image-size": "^0.6.2",
+    "ws": "^5.1.1"
+  }
+}
