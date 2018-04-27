@@ -16,19 +16,39 @@
     "url": "https://github.com/FASTLIKETREE/chromecontroller/issues"
   },
   "homepage": "https://github.com/FASTLIKETREE/chromecontroller#readme",
-  "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "eslint": "^4.19.1",
-    "eslint-config-es2015": "^1.1.0",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^7.0.1",
-    "gulp-watch": "^5.0.0",
-    "run-sequence": "^2.2.1"
-  },
   "dependencies": {
     "express": "^4.16.3",
     "image-size": "^0.6.2",
-    "ws": "^5.1.1"
+    "ws": "^5.1.1",
+    "chrome-promise": "^2.1.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.0",
+    "babel-eslint": "^7.2.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2017-node7": "^0.5.2",
+    "babel-register": "^6.24.0",
+    "browserify": "^14.0.0",
+    "chai": "^3.5.0",
+    "chai-http": "git+https://github.com/chaijs/chai-http.git#3ea4524",
+    "del": "^2.2.2",
+    "eslint": "^3.18.0",
+    "eslint-plugin-import": "^2.7.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-copy": "^1.1.0",
+    "gulp-eslint": "^3.0.1",
+    "gulp-gzip": "^1.4.0",
+    "gulp-mocha": "^4.3.0",
+    "gulp-tar": "^1.9.0",
+    "gulp-util": "^3.0.8",
+    "gulp-watch": "^5.0.0",
+    "gulp-webpack": "^1.5.0",
+    "minimist": "^1.2.0",
+    "mocha": "^3.2.0",
+    "resolve": "^1.3.3",
+    "run-sequence": "^1.2.2",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
   }
 }
