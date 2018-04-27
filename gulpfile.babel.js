@@ -23,23 +23,23 @@ gulp.task('babelServer', function() {
 })
 
 //extension
-const srcExtension = './src/extensions'
-const buildExtension = './build/server'
-const distExtension = './dist/server'
+const srcExtension = './src/extension'
+const buildExtension = './build/extension'
+const distExtension = './dist/extension'
 
 gulp.task('static', function() {
   return gulp.src([srcExtension + '/manifest.json'])
-    .pipe(gulp.dest(dist))
+    .pipe(gulp.dest(distExtension))
 })
 
 gulp.task('babelExtension', function() {
   return gulp.src([srcExtension + '/*.js'])
     .pipe(babel())
-    .pipe(gulp.dest(build))
+    .pipe(gulp.dest(buildExtension))
 })
 
 gulp.task('bundle', function () {
-  var entryPoints = glob.sync(build + '/*.js')
+  var entryPoints = glob.sync(buildExtension + '/*.js')
   var b = browserify({
     entries: entryPoints,
     debug: true
@@ -48,17 +48,20 @@ gulp.task('bundle', function () {
   return b.bundle()
     .pipe(source('background.js'))
     .pipe(buffer())
-    .pipe(gulp.dest(dist));
+    .pipe(gulp.dest(distExtension));
 })
 
 //common
+const build = './build'
+const dist = './dist'
 
 gulp.task('clean', function() {
   return del([build, dist])
 })
 
 gulp.task('lint', function() {
-  return gulp.src([srcServer + '/**/*.js', srcExtension + '/**/*.js'])
+  return gulp.src([src + '/**/*.js'])
+  //return gulp.src([srcServer + '/**/*.js', srcExtension + '/**/*.js'])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError())
