@@ -11,57 +11,57 @@ import runSequence from 'run-sequence'
 import watch from 'gulp-watch'
 import glob from 'glob'
 
-const src = './src'
-const srccontent = './src/content'
-const build = './build'
-const dist = './dist'
-const test = './test'
+//server
+const srcServer = './src/server'
+const buildServer = './build/server'
+const distServer = './dist/server'
+
+gulp.task('babelServer', function() {
+  return gulp.src([srcServer + '/*.js'])
+    .pipe(babel())
+    .pipe(gulp.dest(build))
+})
+
+//extension
+const srcExtension = './src/extensions'
+const buildExtension = './build/server'
+const distExtension = './dist/server'
+
+gulp.task('static', function() {
+  return gulp.src([srcExtension + '/manifest.json'])
+    .pipe(gulp.dest(dist))
+})
+
+gulp.task('babelExtension', function() {
+  return gulp.src([srcExtension + '/*.js'])
+    .pipe(babel())
+    .pipe(gulp.dest(build))
+})
+
+gulp.task('bundle', function () {
+  var entryPoints = glob.sync(build + '/*.js')
+  var b = browserify({
+    entries: entryPoints,
+    debug: true
+  })
+
+  return b.bundle()
+    .pipe(source('background.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest(dist));
+})
+
+//common
 
 gulp.task('clean', function() {
   return del([build, dist])
 })
 
 gulp.task('lint', function() {
-  return gulp.src([src + '/**/*.js'])
+  return gulp.src([srcServer + '/**/*.js', srcExtension + '/**/*.js'])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError())
-})
-
-//We can split out the html copying and transform it in the future
-gulp.task('static', function(){
-  const popup = glob.sync(src + '/popup/*.html')
-  const assets = glob.sync('./static/*')
-
-  return gulp.src([...popup, ...assets, src + '/manifest.json'])
-    .pipe(gulp.dest(dist));
-})
-
-gulp.task('bundle', function () {
-  // set up the browserify instance on a task basis
-  var entryPoints = glob.sync(build + '/*.js')
-  //console.log(entryPoints)
-  var b = browserify({
-    entries: entryPoints,
-    debug: true
-  });
-
-  return b.bundle()
-    .pipe(source('background.js'))
-    .pipe(buffer())
-    .pipe(gulp.dest(dist));
-});
-
-gulp.task('babel', function() {
-  return gulp.src([src + '/*.js', srccontent + '/*.js'])
-    .pipe(babel())
-    .pipe(gulp.dest(build))
-})
-
-gulp.task('babelcontent', function() {
-  return gulp.src([srccontent + '/*.js'])
-    .pipe(babel())
-    .pipe(gulp.dest(dist))
 })
 
 gulp.task('watch', ['deploy'], function() {
@@ -69,7 +69,6 @@ gulp.task('watch', ['deploy'], function() {
     runSequence(
       'clean',
       'babel',
-      'babelpopup',
       'babelcontent',
       'static',
       'bundle',
@@ -78,14 +77,12 @@ gulp.task('watch', ['deploy'], function() {
   })
 })
 
-gulp.task('deploy', function(done){
+gulp.task('extension', function(cb){
   runSequence(
-    'clean',
-    'babel',
-    'babelcontent',
+    'babelExtension',
     'static',
     'bundle',
-    done 
+    cb
   )
 })
 
