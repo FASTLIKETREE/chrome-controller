@@ -19,7 +19,20 @@ const distServer = './dist/server'
 gulp.task('babelServer', function() {
   return gulp.src([srcServer + '/*.js'])
     .pipe(babel())
-    .pipe(gulp.dest(build))
+    .pipe(gulp.dest(buildServer))
+})
+
+gulp.task('distServer', function() {
+  return gulp.src([buildServer + '/*.js'])
+    .pipe(gulp.dest(distServer))
+})
+
+gulp.task('server', function(cb){
+  runSequence(
+    'babelServer',
+    'distServer',
+    cb
+  )
 })
 
 //extension
@@ -51,7 +64,17 @@ gulp.task('bundle', function () {
     .pipe(gulp.dest(distExtension));
 })
 
+gulp.task('extension', function(cb){
+  runSequence(
+    'babelExtension',
+    'static',
+    'bundle',
+    cb
+  )
+})
+
 //common
+const src = './src'
 const build = './build'
 const dist = './dist'
 
@@ -60,7 +83,7 @@ gulp.task('clean', function() {
 })
 
 gulp.task('lint', function() {
-  return gulp.src([src + '/**/*.js'])
+  return gulp.src([srcServer + '/**/*.js', src + '/watcher.js'])
   //return gulp.src([srcServer + '/**/*.js', srcExtension + '/**/*.js'])
     .pipe(eslint())
     .pipe(eslint.format())
@@ -80,13 +103,24 @@ gulp.task('watch', ['deploy'], function() {
   })
 })
 
-gulp.task('extension', function(cb){
+//watcher
+gulp.task('babelWatcher', function() {
+  return gulp.src([src + '/*.js'])
+    .pipe(babel())
+    .pipe(gulp.dest(build))
+})
+
+gulp.task('distWatcher', function() {
+  return gulp.src([build + '/*.js'])
+    .pipe(gulp.dest(dist))
+})
+
+gulp.task('watcher', function(cb){
   runSequence(
-    'babelExtension',
-    'static',
-    'bundle',
+    'babelWatcher',
+    'distWatcher',
     cb
   )
 })
 
-gulp.task('default', ['deploy'])
+gulp.task('default', ['server', 'extension', 'watcher'])

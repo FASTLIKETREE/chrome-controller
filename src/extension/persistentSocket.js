@@ -1,14 +1,15 @@
-const wsUrl = 'ws://localhost:8201'
+import { handleRequest } from './requestHandler'
+const wsUrl = 'ws://localhost:8601'
 
 class persistentSocket {
   constructor(url, channel) {
     this.url = url
     this.channel = channel
     this.connect()
-  } 
+  }
 
   connect() {
-    this.ws = new WebSocket(this.url);
+    this.ws = new WebSocket(this.url)
 
     console.log(`Connecting websocket to: ${this.url}`)
     this.registerEvents()
@@ -24,24 +25,19 @@ class persistentSocket {
 
       //this.ws.send(JSON.stringify({ 'getExtensions': true }));
       //chrome.browserAction.setIcon({ 'path': 'ap-16.png' })
-    };
+    }
 
-    this.ws.onmessage = (e) => {
+    this.ws.onmessage = async (e) => {
       let msg 
       try {
         msg = JSON.parse(e.data)
       } catch (err) {
-        //throw new Error('Invalid message unable to parse ' + msg + ' as json')
-        console.log('Invalid message unable to parse ' + msg + ' as json')
+        throw new Error('Invalid message unable to parse ' + msg + ' as json')
         return
       }
 
-      const msgKeys = Object.keys(msg)
-      if (msgKeys.length != 1) {
-        //throw new Error('Message ' + msg + ' should have a single message key')
-        console.log('Message ' + msg + ' should have a single message key')
-        return
-      }
+      const retObj = await handleRequest(msg)
+      this.send(retObj)
     }
 
     //Change icon on failure
@@ -76,8 +72,9 @@ class persistentSocket {
   }
 
   send(msg) {
+    
     try {
-      this.ws.send(msg)
+      this.ws.send(typeof msg == 'object' ? JSON.stringify(msg) : msg)
     } catch (err) {
       console.log(err)
     }

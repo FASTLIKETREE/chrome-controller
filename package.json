@@ -17,10 +17,15 @@
   },
   "homepage": "https://github.com/FASTLIKETREE/chromecontroller#readme",
   "dependencies": {
+    "chrome-promise": "^2.1.2",
     "express": "^4.16.3",
+    "file-url": "^2.0.2",
     "image-size": "^0.6.2",
-    "ws": "^5.1.1",
-    "chrome-promise": "^2.1.2"
+    "node-watch": "^0.5.8",
+    "request": "^2.85.0",
+    "request-promise": "^4.2.2",
+    "uuid": "^3.2.1",
+    "ws": "^5.1.1"
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",
