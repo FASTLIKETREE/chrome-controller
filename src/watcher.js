@@ -57,7 +57,7 @@ watch(watchFile, { recursive: true }, async function(evt, name) {
     json: true
   } 
 
-  const tab = await rp(options)
+  await rp(options)
 })
 
 initializeTab()

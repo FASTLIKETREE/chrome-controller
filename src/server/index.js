@@ -23,11 +23,9 @@ app.use(function(req, res, next) {
 })
 
 app.post('/generic', (req, res) => {
-  console.log('we got a request BUM BUM BUM!')
   const uuid = uuidv1()
-  console.log(uuid)
   reqSocketMap[uuid] = { req, res, uuid }
-  socket.broadcast(JSON.stringify({ uuid : uuid, body: req.body }))
+  socket.broadcast(JSON.stringify({ uuid, body: req.body }))
 })
 
 socket.on('connection', function connection(ws) {
@@ -35,10 +33,8 @@ socket.on('connection', function connection(ws) {
 
   ws.on('message', (msg) => {
     const parsedMsg = JSON.parse(msg)
-    console.log('WE SHOULD GET AN ID HERE AND COMPLETE THE REQUEST WOOHOO')
-    console.log('received: %s', msg);
-    console.log('below is msg!');
-    console.log(parsedMsg);
+    console.log('received: %s', msg)
+    console.log(parsedMsg)
   
     const { res } = reqSocketMap[parsedMsg.uuid]
     res.status(200).send(parsedMsg.data)
@@ -47,26 +43,16 @@ socket.on('connection', function connection(ws) {
   ws.on('error', (err) => {
     console.log(err)
   })
-  //ws.send('something');
 })
-
-
-//app.post('/refresh', (req, res) => {
-//  console.log('we are going torefrehs now?')
-//  socket.broadcast('refresh')
-//  res.sendStatus(204)
-//})
 
 socket.broadcast = function broadcast(data) {
   socket.clients.forEach(function each(client) {
-    //console.log(client + '<-- this is the client')
     if (client.readyState === ws.OPEN) {
-      console.log(client.readyState + '<-- this is the client ready state')
       client.send(data)
     }
   })
 }
 
-//setInterval(function () {
-//  socket.broadcast('ping')
-//}, 30000)
+setInterval(function () {
+  socket.broadcast('ping')
+}, 30000)
