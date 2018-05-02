@@ -18,7 +18,7 @@ console.log(`server listening on ${serverPort}`)
 console.log(`server listening on ${socketPort}`)
 
 app.use(function(req, res, next) {
-  console.log('we are in middleware something sould print?')
+  console.log(req.body)
   next()
 })
 

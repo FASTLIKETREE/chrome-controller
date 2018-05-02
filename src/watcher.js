@@ -3,6 +3,7 @@ import rp from 'request-promise'
 import fileUrl from 'file-url'
 
 const watchFile = '../card-builder/card.html'
+const watchFileUrl = fileUrl(watchFile)
 
 const extensionServer = 'http://localhost'
 const extensionServerPort = 9250
@@ -12,14 +13,7 @@ console.log(extensionUrl)
 
 let tabId
 
-async function initializeTab() {
-  const cardUrl = fileUrl(watchFile)
-  const tabOptions = { url: cardUrl }
-
-  const fn = 'chrome.tabs.create'
-  const args = []
-  args.push(tabOptions)
-  
+async function callChromeApi(fn, args) {
   const reqBody = { fn, args }
 
   const options = {
@@ -29,9 +23,13 @@ async function initializeTab() {
     json: true
   }
   
-  const tab = await rp(options)
+  return rp(options)
+}
+
+async function initialize() {
+  console.log('Initializing tab')
+  const tab = await callChromeApi('chrome.tabs.create', [{ url: watchFileUrl }])
   tabId = tab.id
-  console.log('Tab has been initialized')
 }
 
 
@@ -40,24 +38,8 @@ watch(watchFile, { recursive: true }, async function(evt, name) {
     throw new Error('tab has not been initialized')
   }
 
-  console.log(evt)
-  console.log(name)
-
-  const fn = 'chrome.tabs.reload'
-  const args = []
-  args.push(tabId)
-  args.push({})
-
-  const reqBody = { fn, args }
-
-  const options = {
-    method: 'POST',
-    uri: `${extensionUrl}/generic`,
-    body: reqBody,
-    json: true
-  } 
-
-  await rp(options)
+  let reload = await callChromeApi('chrome.tabs.reload', [tabId, {}])
+  let capture = await callChromeApi('chrome.tabs.captureVisisbleTab', [tabId, { format: 'png' }])
 })
 
-initializeTab()
+initialize()

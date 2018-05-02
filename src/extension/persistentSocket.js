@@ -28,6 +28,8 @@ class persistentSocket {
     }
 
     this.ws.onmessage = async (e) => {
+      if (e.data == 'ping') return
+
       let msg 
       try {
         msg = JSON.parse(e.data)
