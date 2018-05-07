@@ -1,22 +1,55 @@
-import ChromePromise from 'chrome-promise'
 
-const pChrome = new ChromePromise()
+const apiQueue = {}
+let reloadSync
+let eventsRegistered = 0
 
 async function handleRequest(data) {
-  console.log(data)
   const { uuid, body } = data
-  let { fn, args } = body
+  let { tabId, fn, args } = body
   console.log(fn)
-  console.log(body)
 
-  const promiseFn = fn.replace('chrome', 'pChrome')
+  if (fn == 'chrome.tabs.create' && !eventsRegistered) {
+    eventsRegistered = 1
+    console.log('We are adding the onUpdate listener')
+    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
-  console.log(`${promiseFn}.apply(null, ${JSON.stringify(args)})`)
-  let returnData = await eval(`${promiseFn}.apply(null, ${JSON.stringify(args)})`)
+      console.log(tabId)
+      console.log(changeInfo)
+      console.log(apiQueue)
+      console.log('we are firing the updated listener, this should wait to capture until this gets hit after a reload..')
+      if (reloadSync) {
+        console.log(reloadSync)
+        reloadSync.resolve(reloadSync.data)
+        reloadSync = undefined
+      }
+    })
+  }
+  return callChromeApi(uuid, fn, args)
+}
 
-  console.log(returnData)
-  console.log('about to return out of handleRequest!')
-  return { uuid, data: returnData }
+function callChromeApi(uuid, fn, args, promise) {
+  console.log('callChromeApi')
+  console.log(uuid)
+  console.log(fn)
+  console.log(args)
+  
+  const retPromise = new Promise(function(resolve, reject) {
+    const finalArgs = [...args, function (returnData) { 
+      if (fn == 'chrome.tabs.reload') {
+        reloadSync = { resolve, data: { uuid, data: returnData || [] } }
+      } else {
+        resolve({ uuid, data: returnData || [] })
+      }
+    }]
+
+    //const finalArgs = [...args, function chromeCallback(a, b, c) { 
+    //  let returnData = a || []
+    //  resolve({ uuid, data: returnData })
+    //}]
+
+    eval(fn).apply(this, finalArgs)
+  })
+  return retPromise
 }
 
 export { handleRequest }

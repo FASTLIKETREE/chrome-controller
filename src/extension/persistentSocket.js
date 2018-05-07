@@ -86,7 +86,8 @@ class persistentSocket {
 const ws = new persistentSocket(wsUrl)
 
 setInterval(function() {
-  console.log('Required to keep background page open')
+  null
+  //console.log('Required to keep background page open')
 }, 5000)
 
 export { ws }

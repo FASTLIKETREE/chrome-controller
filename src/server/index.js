@@ -18,12 +18,13 @@ console.log(`server listening on ${serverPort}`)
 console.log(`server listening on ${socketPort}`)
 
 app.use(function(req, res, next) {
-  console.log(req.body)
+  //console.log(req.body)
   next()
 })
 
 app.post('/generic', (req, res) => {
   const uuid = uuidv1()
+  console.log(req.body)
   reqSocketMap[uuid] = { req, res, uuid }
   socket.broadcast(JSON.stringify({ uuid, body: req.body }))
 })
@@ -32,12 +33,18 @@ socket.on('connection', function connection(ws) {
   console.log('Connection received.')
 
   ws.on('message', (msg) => {
-    const parsedMsg = JSON.parse(msg)
-    console.log('received: %s', msg)
-    console.log(parsedMsg)
-  
-    const { res } = reqSocketMap[parsedMsg.uuid]
-    res.status(200).send(parsedMsg.data)
+    try {
+      console.log('received: %s', msg)
+      const parsedMsg = JSON.parse(msg)
+      //console.log(parsedMsg)
+    
+      const { res } = reqSocketMap[parsedMsg.uuid]
+      res.status(200).send(parsedMsg.data)
+    }
+    catch (err) {
+      console.log('Invalid JSON message recieved')
+      console.log(err)
+    }
   })
 
   ws.on('error', (err) => {

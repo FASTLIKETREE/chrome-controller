@@ -24,6 +24,7 @@
     "node-watch": "^0.5.8",
     "request": "^2.85.0",
     "request-promise": "^4.2.2",
+    "sharp": "^0.20.2",
     "uuid": "^3.2.1",
     "ws": "^5.1.1"
   },

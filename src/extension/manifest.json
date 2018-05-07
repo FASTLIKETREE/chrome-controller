@@ -2,7 +2,7 @@
   "name": "Chrome controller",
   "version": "1.0",
   "description": "Chrome controller",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage", "tabs", "activeTab", "<all_urls>"],
   "background": {
     "scripts": ["background.js"],
     "persistent": true
