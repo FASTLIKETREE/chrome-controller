@@ -60,8 +60,7 @@ watch(watchFile, { recursive: true }, async function() {
   if (boundingArray) {
     console.log(boundingArray)
     sharp(base64Buffer.data)
-      //.resize(500, 100)
-      .extract({ left: boundingArray[0] * 2, top: boundingArray[1] * 2, width: boundingArray[2] * 2, height: boundingArray[3] * 2 })
+      .extract({ left: boundingArray[0], top: boundingArray[1], width: boundingArray[2], height: boundingArray[3] })
       //.trim()
       .toFile(__dirname + '/out.png', function(err, info) {
         if(err) {
@@ -71,7 +70,6 @@ watch(watchFile, { recursive: true }, async function() {
       })
   } else {
     sharp(base64Buffer.data)
-      //.resize(500, 100)
       .trim()
       .toFile(__dirname + '/out.png', function(err, info) {
         if(err) {
@@ -80,11 +78,6 @@ watch(watchFile, { recursive: true }, async function() {
         console.log('Successfully used sharp?')
       })
   }
-
-  //fs.writeFile(__dirname + '/out.png', base64Buffer.data, function(err) {
-  //  console.log('error, what is wrong here?')
-  //  console.log(err)
-  //})
 })
 
 function decodeBase64Image(dataString) {
