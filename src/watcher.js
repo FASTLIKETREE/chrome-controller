@@ -3,6 +3,7 @@ import rp from 'request-promise'
 import fileUrl from 'file-url'
 import fs from 'fs'
 import sharp from 'sharp'
+import jimp from 'jimp'
 
 const watchFile = '../card-builder/card.html'
 const watchFileUrl = fileUrl(watchFile)
@@ -58,25 +59,45 @@ watch(watchFile, { recursive: true }, async function() {
   console.log(base64Buffer)
 
   if (boundingArray) {
+    const transparentPixelDecimal = parseInt('ff4bff00', 16)
     console.log(boundingArray)
     sharp(base64Buffer.data)
       .extract({ left: boundingArray[0], top: boundingArray[1], width: boundingArray[2], height: boundingArray[3] })
-      //.trim()
-      .toFile(__dirname + '/out.png', function(err, info) {
-        if(err) {
-          console.log(err)
-        }
-        console.log('Successfully used sharp?')
+      .png()
+      .toBuffer()
+      .then( (data) => {
+        jimp.read(data)
+        .then( (jimpImg) => {
+          console.log(jimpImg.bitmap.width)
+          console.log(jimpImg.bitmap.height)
+          for (let x = 0; x < jimpImg.bitmap.width; ++x) {
+            for (let y = 0; y < jimpImg.bitmap.height; ++y) {
+              const pixelHex = jimpImg.getPixelColor(x, y).toString(16)
+              if (pixelHex == 'ff4bffff') {
+                jimpImg.setPixelColor(transparentPixelDecimal, x, y)
+              }
+              //console.log(jimpImg.getPixelColor(x, y).toString(16))
+            }
+          }
+          jimpImg.write('./out.png')
+        })
       })
-  } else {
-    sharp(base64Buffer.data)
-      .trim()
-      .toFile(__dirname + '/out.png', function(err, info) {
-        if(err) {
-          console.log(err)
-        }
-        console.log('Successfully used sharp?')
-      })
+      //.toFile(__dirname + '/out.png', function(err, info) {
+      //  if(err) {
+      //    console.log(err)
+      //  }
+      //  console.log('Successfully used sharp?')
+      //})
+  //} else {
+  //  sharp(base64Buffer.data)
+  //    .trim()
+  //    .toFile(__dirname + '/out.png', function(err, info) {
+  //      if(err) {
+  //        console.log(err)
+  //      }
+  //      console.log('Successfully used sharp?')
+  //    })
+  //}
   }
 })
 
