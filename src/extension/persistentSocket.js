@@ -70,7 +70,7 @@ class persistentSocket {
     if (this.reconnectInterval) {
       clearInterval(this.reconnectInterval)
     }
-    this.reconnectInterval = setInterval(this.connect.bind(this), 3000)
+    this.reconnectInterval = setInterval(this.connect.bind(this), 750)
   }
 
   send(msg) {

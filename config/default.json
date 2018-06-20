@@ -1,0 +1,11 @@
+{
+  "watcher": {
+    "cardDetail": "../card-builder/card_details.js",
+    "cardHtml": "../card-builder/card.html",
+    "extensionServer": "http://localhost",
+    "extensionServerPort": 9250,
+    "outputPath": "../card-builder/cards",
+    "transparentColor": "ff4bff"
+  }
+}
+

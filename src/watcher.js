@@ -4,13 +4,14 @@ import fileUrl from 'file-url'
 import fs from 'fs'
 import sharp from 'sharp'
 import jimp from 'jimp'
+import config from 'config'
 
-const watchFile = '../card-builder/card.html'
-const watchFileUrl = fileUrl(watchFile)
+//const watchFile = '../card-builder/card.html'
+//const watchFileUrl = fileUrl(watchFile)
+const watcherConfig = config.watcher
 
-const extensionServer = 'http://localhost'
-const extensionServerPort = 9250
-const extensionUrl = `${extensionServer}:${extensionServerPort}`
+const htmlFileUrl = fileUrl(watcherConfig.cardHtml)
+const extensionUrl = `${watcherConfig.extensionServer}:${watcherConfig.extensionServerPort}`
 
 console.log(extensionUrl)
 
@@ -25,81 +26,62 @@ async function callChromeApi(tabId, fn, args) {
     body: reqBody,
     json: true
   }
-  
+
   return rp(options)
 }
 
 async function initialize() {
   console.log('Initializing tab')
-  tab = await callChromeApi(null, 'chrome.tabs.create', [{ url: watchFileUrl }])
+  try {
+    tab = await callChromeApi(null, 'chrome.tabs.create', [{ url: htmlFileUrl }])
+    watchHtml()
+  } catch (err) {
+    console.log('Errored on connection')
+    console.log(err)
+    setTimeout(initialize, 750)
+  }
 }
 
-watch(watchFile, { recursive: true }, async function() {
-  if (!tab.id) {
-    throw new Error('tab has not been initialized')
-  }
-
-  await callChromeApi(tab.id, 'chrome.tabs.reload', [tab.id, {}])
-  await callChromeApi(tab.id, 'chrome.tabs.update', [tab.id, { active: true, highlighted: true }])
-  const capture = await callChromeApi(tab.id, 'chrome.tabs.captureVisibleTab', [tab.windowId, { format: 'png' }])
-
-  let boundingArray
-  const cardHtml = fs.readFileSync('../card-builder/card.html', 'utf-8')
-  if (cardHtml.startsWith('<!--')) {
-    const sHtml = cardHtml.split(' -->')
-    boundingArray = sHtml[0].replace('<!-- ', '').split(', ')
-    for( const [index, bound] of boundingArray.entries()) {
-      boundingArray[index] = Number(boundingArray[index])
+function watchHtml() {
+  watch(watcherConfig.cardDetail, { recursive: true }, async function() {
+    if (!tab.id) {
+      throw new Error('tab has not been initialized')
     }
-    console.log('WE HAVE FOUND THE BOUDNING ARRAAY!! WOOHOO')
-    console.log(boundingArray)
-  }
+    console.log('tabid :' + tab.id)
 
-  const base64Buffer = decodeBase64Image(capture)
-  console.log(base64Buffer)
+    await callChromeApi(tab.id, 'chrome.tabs.reload', [tab.id, {}])
+    await callChromeApi(tab.id, 'chrome.tabs.update', [tab.id, { active: true, highlighted: true }])
+    const capture = await callChromeApi(tab.id, 'chrome.tabs.captureVisibleTab', [tab.windowId, { format: 'png' }])
 
-  if (boundingArray) {
+    const cardHtml = fs.readFileSync(watcherConfig.cardHtml, 'utf-8')
+    const { left, top, width, height, name } = JSON.parse(fs.readFileSync(watcherConfig.cardDetail, 'utf-8'))
+
+    const base64Buffer = decodeBase64Image(capture)
+    console.log(base64Buffer)
+
     const transparentPixelDecimal = parseInt('ff4bff00', 16)
-    console.log(boundingArray)
     sharp(base64Buffer.data)
-      .extract({ left: boundingArray[0], top: boundingArray[1], width: boundingArray[2], height: boundingArray[3] })
-      .png()
-      .toBuffer()
-      .then( (data) => {
-        jimp.read(data)
-        .then( (jimpImg) => {
-          console.log(jimpImg.bitmap.width)
-          console.log(jimpImg.bitmap.height)
-          for (let x = 0; x < jimpImg.bitmap.width; ++x) {
-            for (let y = 0; y < jimpImg.bitmap.height; ++y) {
-              const pixelHex = jimpImg.getPixelColor(x, y).toString(16)
-              if (pixelHex == 'ff4bffff') {
-                jimpImg.setPixelColor(transparentPixelDecimal, x, y)
-              }
-              //console.log(jimpImg.getPixelColor(x, y).toString(16))
+    .extract({ left, top, width, height })
+    .png()
+    .toBuffer()
+    .then( (data) => {
+      jimp.read(data)
+      .then( (jimpImg) => {
+        console.log(jimpImg.bitmap.width)
+        console.log(jimpImg.bitmap.height)
+        for (let x = 0; x < jimpImg.bitmap.width; ++x) {
+          for (let y = 0; y < jimpImg.bitmap.height; ++y) {
+            const pixelHex = jimpImg.getPixelColor(x, y).toString(16)
+            if (pixelHex == `${watcherConfig.transparentColor}ff`) {
+              jimpImg.setPixelColor(transparentPixelDecimal, x, y)
             }
           }
-          jimpImg.write('./out.png')
-        })
+        }
+        jimpImg.write(`${watcherConfig.outputPath}/${name}.jpg`)
       })
-      //.toFile(__dirname + '/out.png', function(err, info) {
-      //  if(err) {
-      //    console.log(err)
-      //  }
-      //  console.log('Successfully used sharp?')
-      //})
-  //} else {
-  //  sharp(base64Buffer.data)
-  //    .trim()
-  //    .toFile(__dirname + '/out.png', function(err, info) {
-  //      if(err) {
-  //        console.log(err)
-  //      }
-  //      console.log('Successfully used sharp?')
-  //    })
-  //}
-  }
-})
+    })
+  })
+}
 
 function decodeBase64Image(dataString) {
   try {
