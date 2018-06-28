@@ -1,6 +1,7 @@
 {
   "watcher": {
-    "cardDetail": "../card-builder/card_details.js",
+    "poolThreads": 8,
+    "cardDetail": "../card-builder/details.js",
     "cardHtml": "../card-builder/card.html",
     "extensionServer": "http://localhost",
     "extensionServerPort": 9250,
